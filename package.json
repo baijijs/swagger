@@ -1,0 +1,36 @@
+{
+  "name": "baiji-swagger",
+  "version": "0.1.0",
+  "description": "Baiji swagger plugin",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/baijijs/swagger.git"
+  },
+  "keywords": [
+    "baiji",
+    "swagger"
+  ],
+  "author": "lyfeyaj",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/baijijs/swagger/issues"
+  },
+  "homepage": "https://github.com/baijijs/swagger#readme",
+  "dependencies": {
+    "ejs": "^2.5.6",
+    "express": "^4.15.2",
+    "lodash.get": "^4.4.2",
+    "lodash.map": "^4.6.0",
+    "lodash.reduce": "^4.6.0",
+    "lodash.set": "^4.3.2",
+    "lodash.values": "^4.3.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
+  }
+}
