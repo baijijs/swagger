@@ -278,7 +278,12 @@ function swaggerPlugin(app, options) {
   app.use(
     createSwaggerServer(
       swagger,
-      path.posix.join(app.fullPath(), SWAGGER_BASE_PATH, 'config')
+      path.posix.join(
+        swagger.basePath || '/',
+        app.fullPath(),
+        SWAGGER_BASE_PATH,
+        'config'
+      )
     ),
     {
       name: SWAGGER_BASE_PATH,
