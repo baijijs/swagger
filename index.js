@@ -68,6 +68,17 @@ function swaggerPlugin(app, options) {
     }
   }, options.swagger || {});
 
+  // Build security
+  let securities = map(swagger.securityDefinitions || {}, function(security, name) {
+    let res = {};
+    if (security.type === 'oauth2') {
+      res[name] = Object.keys(security.scopes || {});
+    } else {
+      res[name] = [];
+    }
+    return res;
+  });
+
   // Transfer `:id` like parameter to `{id}`
   function pathReplacer(path) {
     return path.replace(/:([a-zA-Z0-9\-\_]+)/g, function(__, capture) {
@@ -262,7 +273,8 @@ function swaggerPlugin(app, options) {
       consumes: acceptTypes,
       produces: supportTypes,
       parameters: buildParameters(method, method.params),
-      responses: defaultResponses || {}
+      responses: defaultResponses || {},
+      security: securities
     };
 
     set(paths, path, pathConfig);
