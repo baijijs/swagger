@@ -1,5 +1,9 @@
 # Baiji swagger plugin
 
+### Note
+
+Current swagger-ui version: `v3.0.7`
+
 
 ### Installation
 
