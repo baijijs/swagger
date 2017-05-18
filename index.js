@@ -22,13 +22,20 @@ function createSwaggerServer(config, url) {
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, 'views'));
 
-  // set
-  app.use(express.static(path.join(__dirname, 'dist')));
+  // Static files support
+  app.use(
+    express.static(
+      path.dirname(require.resolve('swagger-ui-dist/index.html')),
+      { index: false }
+    )
+  );
 
+  // Swagger config api
   app.get('/config', function(req, res) {
     res.send(config);
   });
 
+  // Swagger ui
   app.get('/', function(req, res) {
     res.render('index', { title: get(config, 'info.title'), configUrl: url });
   });
