@@ -257,6 +257,25 @@ function swaggerPlugin(app, options) {
     addedTags[name] = true;
   }
 
+  // Choose content type
+  function chooseContentType(params) {
+    let consumes = ['application/json'];
+    for (let i = 0; i < params.length; i++) {
+      let param = params[i] || {};
+      if (param.type === 'file') {
+        consumes = ['multipart/form-data'];
+        break;
+      }
+
+      if (param.in === 'formData') {
+        consumes = ['application/x-www-form-urlencoded'];
+        break;
+      }
+    }
+
+    return consumes;
+  }
+
   // add path by method
   function addPath(method) {
     if (method.name === '__swagger__') return;
@@ -273,13 +292,18 @@ function swaggerPlugin(app, options) {
 
     addTag(tagName, tagDesc);
 
+    let parameters = buildParameters(method, method.params);
+
+    // Choose content-type
+    let consumes = chooseContentType(parameters);
+
     pathConfig[httpMethod] = {
       tags: [tagName],
       summary: method.description,
       description: method.notes,
-      consumes: acceptTypes,
+      consumes: consumes,
       produces: supportTypes,
-      parameters: buildParameters(method, method.params),
+      parameters: parameters,
       responses: defaultResponses || {},
       security: securities
     };
@@ -292,6 +316,8 @@ function swaggerPlugin(app, options) {
   swagger.tags = tags;
   swagger.paths = paths;
   swagger.definitions = definitions;
+  swagger.consumes = acceptTypes;
+  swagger.produces = supportTypes;
 
   // use swagger service middleware
   app.use(
