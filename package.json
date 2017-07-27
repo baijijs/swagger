@@ -1,6 +1,6 @@
 {
   "name": "baiji-swagger",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Baiji swagger plugin",
   "main": "index.js",
   "scripts": {
