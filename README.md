@@ -3,7 +3,7 @@
 ### Installation
 
 ```bash
-npm install baiji-swagger
+npm install baiji-swagger --save
 ```
 
 ### Usage
