@@ -107,13 +107,20 @@ function swaggerPlugin(app, options) {
   function chooseParameterPositionBy(verb, params) {
     if (['get', 'options'].indexOf(verb) > -1) return 'query';
 
-    let shouldInBody = reduce(params, function(res, param) {
-      if (param.params) {
-        return res || true;
-      } else {
-        return res || false;
-      }
-    }, false);
+    let shouldInBody;
+
+    if (params.length) {
+      shouldInBody = reduce(params, function(res, param) {
+        if (param.params) {
+          return res || true;
+        } else {
+          return res || false;
+        }
+      }, false);
+    } else {
+      // Set parameter position as `body` when there is on params required
+      shouldInBody = true;
+    }
 
     return shouldInBody ? 'body' : 'formData';
   }
@@ -224,22 +231,34 @@ function swaggerPlugin(app, options) {
       return result;
     } else {
       result = values(result);
-      if (isInBody && Object.keys(body).length) {
+      if (isInBody) {
+        if (Object.keys(body).length) {
+          definitions[bodyDefinitionKey] = {
+            type: 'object',
+            properties: body
+          };
 
-        definitions[bodyDefinitionKey] = {
-          type: 'object',
-          properties: body
-        };
-
-        result.push({
-          in: 'body',
-          name: 'body',
-          description: 'body',
-          required: true,
-          schema: {
-            $ref: `#/definitions/${bodyDefinitionKey}`
-          }
-        });
+          result.push({
+            in: 'body',
+            name: 'body',
+            description: 'body',
+            required: true,
+            schema: {
+              $ref: `#/definitions/${bodyDefinitionKey}`
+            }
+          });
+        } else {
+          // Allow pass json body to post action
+          result.push({
+            in: 'body',
+            name: 'body',
+            description: 'body',
+            required: false,
+            schema: {
+              type: 'object'
+            }
+          });
+        }
       }
 
       return result;
@@ -299,7 +318,7 @@ function swaggerPlugin(app, options) {
 
     pathConfig[httpMethod] = {
       tags: [tagName],
-      summary: method.description,
+      summary: `${method.fullName()} => ${method.description}`,
       description: method.notes,
       consumes: consumes,
       produces: supportTypes,
