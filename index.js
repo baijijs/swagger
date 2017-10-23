@@ -7,9 +7,12 @@ const map = require('lodash.map');
 const reduce = require('lodash.reduce');
 const express = require('express');
 const path = require('path');
+const assert = require('assert');
+const semver = require('semver');
 
 const SWAGGER_VERSION = '2.0';
 const SWAGGER_BASE_PATH = '__swagger__';
+const MINIMAL_VERSION_REQUIRED = '0.8.16';
 
 const DEFAULT_RESPONSES = {
   default: { description: 'Default responses' }
@@ -43,7 +46,8 @@ function createSwaggerServer(config, url) {
   return app;
 }
 
-function swaggerPlugin(app, options) {
+// Install swagger plugin
+function installSwaggerPlugin(app, options) {
   options = options || {};
   let defaultResponses = options.defaultResponses || DEFAULT_RESPONSES;
   let tags = [];
@@ -355,6 +359,18 @@ function swaggerPlugin(app, options) {
       mountPath: SWAGGER_BASE_PATH
     }
   );
+}
+
+function swaggerPlugin(app, options) {
+  // Check baiji version
+  assert(
+    semver.satisfies(app.constructor.VERSION, `>= ${MINIMAL_VERSION_REQUIRED}`),
+    `baiji-gateway plugin require baiji version larger than ${MINIMAL_VERSION_REQUIRED}`
+  );
+
+  app.on('mount', function() {
+    installSwaggerPlugin(this, options);
+  });
 }
 
 module.exports = swaggerPlugin;
