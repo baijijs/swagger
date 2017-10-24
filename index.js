@@ -12,42 +12,14 @@ const semver = require('semver');
 
 const SWAGGER_VERSION = '2.0';
 const SWAGGER_BASE_PATH = '__swagger__';
-const MINIMAL_VERSION_REQUIRED = '0.8.16';
+const MINIMAL_VERSION_REQUIRED = '0.8.17';
 
 const DEFAULT_RESPONSES = {
   default: { description: 'Default responses' }
 };
 
-function createSwaggerServer(config, url) {
-  let app = express();
-
-  // Set view config
-  app.set('view engine', 'ejs');
-  app.set('views', path.join(__dirname, 'views'));
-
-  // Static files support
-  app.use(
-    express.static(
-      path.dirname(require.resolve('swagger-ui-dist/index.html')),
-      { index: false }
-    )
-  );
-
-  // Swagger config api
-  app.get('/config', function(req, res) {
-    res.send(config);
-  });
-
-  // Swagger ui
-  app.get('/', function(req, res) {
-    res.render('index', { title: get(config, 'info.title'), configUrl: url });
-  });
-
-  return app;
-}
-
 // Install swagger plugin
-function installSwaggerPlugin(app, options) {
+function buildSwaggerConfig(app, options) {
   options = options || {};
   let defaultResponses = options.defaultResponses || DEFAULT_RESPONSES;
   let tags = [];
@@ -342,25 +314,10 @@ function installSwaggerPlugin(app, options) {
   swagger.consumes = acceptTypes;
   swagger.produces = supportTypes;
 
-  // use swagger service middleware
-  app.use(
-    createSwaggerServer(
-      swagger,
-      path.posix.join(
-        swagger.basePath || '/',
-        app.fullPath(),
-        SWAGGER_BASE_PATH,
-        'config'
-      )
-    ),
-    {
-      name: SWAGGER_BASE_PATH,
-      description: 'swagger documentation plugin',
-      mountPath: SWAGGER_BASE_PATH
-    }
-  );
+  return swagger;
 }
 
+// Swagger Plugin
 function swaggerPlugin(app, options) {
   // Check baiji version
   assert(
@@ -369,8 +326,55 @@ function swaggerPlugin(app, options) {
   );
 
   app.on('mount', function() {
-    installSwaggerPlugin(this, options);
+    let config = buildSwaggerConfig(this, options);
+
+    function createSwaggerServer(url) {
+      let swaggerApp = express();
+
+      // Set view config
+      swaggerApp.set('view engine', 'ejs');
+      swaggerApp.set('views', path.join(__dirname, 'views'));
+
+      // Static files support
+      swaggerApp.use(
+        express.static(
+          path.dirname(require.resolve('swagger-ui-dist/index.html')),
+          { index: false }
+        )
+      );
+
+      // Swagger config api
+      swaggerApp.get('/config', function(req, res) {
+        res.send(config);
+      });
+
+      // Swagger ui
+      swaggerApp.get('/', function(req, res) {
+        res.render('index', { title: get(config, 'info.title'), configUrl: url });
+      });
+
+      return swaggerApp;
+    }
+
+    // use swagger service middleware
+    this.use(
+      createSwaggerServer(
+        path.posix.join(
+          config.basePath || '/',
+          this.fullPath(),
+          SWAGGER_BASE_PATH,
+          'config'
+        )
+      ),
+      {
+        name: SWAGGER_BASE_PATH,
+        description: 'swagger documentation plugin',
+        mountPath: SWAGGER_BASE_PATH
+      }
+    );
   });
+
+  return null;
 }
 
 module.exports = swaggerPlugin;
