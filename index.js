@@ -322,7 +322,7 @@ function swaggerPlugin(app, options) {
   // Check baiji version
   assert(
     semver.satisfies(app.constructor.VERSION, `>= ${MINIMAL_VERSION_REQUIRED}`),
-    `baiji-gateway plugin require baiji version larger than ${MINIMAL_VERSION_REQUIRED}`
+    `baiji-swagger plugin require baiji version larger than ${MINIMAL_VERSION_REQUIRED}`
   );
 
   app.on('mount', function() {
