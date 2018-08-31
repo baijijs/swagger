@@ -64,7 +64,7 @@ function buildSwaggerConfig(app, options) {
 
   // Transfer `:id` like parameter to `{id}`
   function pathReplacer(path) {
-    return path.replace(/:([a-zA-Z0-9\-\_]+)/g, function(__, capture) {
+    return path.replace(/:([a-zA-Z0-9\-_]+)/g, function(__, capture) {
       return `{${capture}}`;
     });
   }
@@ -104,8 +104,8 @@ function buildSwaggerConfig(app, options) {
   // Build swagger compatible parameters
   function buildParameters(method, params, definitionPrefix, buildForDefinitiion) {
     let defaultIn = buildForDefinitiion ?
-                    'query' :
-                    chooseParameterPositionBy(method.route.verb, params);
+      'query' :
+      chooseParameterPositionBy(method.route.verb, params);
 
     let path = method.fullPath();
 
@@ -292,16 +292,31 @@ function buildSwaggerConfig(app, options) {
     // Choose content-type
     let consumes = chooseContentType(parameters);
 
-    pathConfig[httpMethod] = {
-      tags: [tagName],
-      summary: `${method.fullName()} => ${method.description}`,
-      description: method.notes,
-      consumes: consumes,
-      produces: supportTypes,
-      parameters: parameters,
-      responses: defaultResponses || {},
-      security: securities
-    };
+    if (httpMethod === 'all') {
+      ['get', 'post', 'put', 'delete', 'patch'].forEach(function(verb) {
+        pathConfig[verb] = {
+          tags: [tagName],
+          summary: `${method.fullName()} => ${method.description}`,
+          description: method.notes,
+          consumes: consumes,
+          produces: supportTypes,
+          parameters: parameters,
+          responses: defaultResponses || {},
+          security: securities
+        };
+      });
+    } else {
+      pathConfig[httpMethod] = {
+        tags: [tagName],
+        summary: `${method.fullName()} => ${method.description}`,
+        description: method.notes,
+        consumes: consumes,
+        produces: supportTypes,
+        parameters: parameters,
+        responses: defaultResponses || {},
+        security: securities
+      };
+    }
 
     set(paths, path, pathConfig);
   }
