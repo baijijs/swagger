@@ -1,6 +1,6 @@
 {
   "name": "baiji-swagger",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "Baiji swagger plugin",
   "main": "index.js",
   "scripts": {
@@ -21,18 +21,20 @@
   },
   "homepage": "https://github.com/baijijs/swagger#readme",
   "dependencies": {
+    "basic-auth": "^2.0.1",
     "ejs": "^2.6.1",
-    "express": "^4.16.3",
+    "express": "^4.16.4",
     "lodash.get": "^4.4.2",
     "lodash.map": "^4.6.0",
     "lodash.reduce": "^4.6.0",
     "lodash.set": "^4.3.2",
     "lodash.values": "^4.3.0",
-    "semver": "^5.5.1",
-    "swagger-ui-dist": "^3.18.2"
+    "semver": "^5.6.0",
+    "swagger-ui-dist": "^3.20.4",
+    "tsscmp": "^1.0.6"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
+    "chai": "^4.2.0",
     "mocha": "^5.2.0"
   }
 }
