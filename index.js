@@ -11,6 +11,7 @@ const assert = require('assert');
 const semver = require('semver');
 const auth = require('basic-auth');
 const compare = require('tsscmp');
+const crypto = require('crypto');
 
 const SWAGGER_VERSION = '2.0';
 const SWAGGER_BASE_PATH = '__swagger__';
