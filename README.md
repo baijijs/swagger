@@ -16,6 +16,7 @@ const app = baiji('myApp');
 app.plugin(
   require('baiji-swagger'),
   {
+    basicAuth: { name: 'doc', pass: 'your_doc_password' },
     swagger: {
       info: { title: 'My API DOCUMENTATION' }
     }
