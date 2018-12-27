@@ -11,7 +11,6 @@ const assert = require('assert');
 const semver = require('semver');
 const auth = require('basic-auth');
 const compare = require('tsscmp');
-const crypto = require('crypto');
 
 const SWAGGER_VERSION = '2.0';
 const SWAGGER_BASE_PATH = '__swagger__';
@@ -346,22 +345,11 @@ function swaggerPlugin(app, options) {
   app.on('mount', function() {
     let config = buildSwaggerConfig(this, options);
 
-    function createSwaggerServer(baseUrl) {
+    function createSwaggerServer(configUrl) {
       let swaggerApp = express();
-      let CONFIG_TOKEN = '';
+
       let basicAuth = get(options, 'basicAuth') || {};
       let authEnabled = basicAuth.name && basicAuth.pass;
-
-      // Basic function to validate credentials for example
-      function check(credentials) {
-        let valid = true;
-
-        // Simple method to prevent short-circut and use timing-safe compare
-        valid = compare(credentials.name, basicAuth.name) && valid;
-        valid = compare(credentials.pass, basicAuth.pass) && valid;
-
-        return valid;
-      }
 
       // Set view config
       swaggerApp.set('view engine', 'ejs');
@@ -375,36 +363,43 @@ function swaggerPlugin(app, options) {
         )
       );
 
-      // Swagger ui
-      swaggerApp.get('/', function(req, res) {
+      // Basic function to validate credentials for example
+      function check(credentials) {
+        let valid = true;
+
+        // Simple method to prevent short-circut and use timing-safe compare
+        valid = compare(credentials.name, basicAuth.name) && valid;
+        valid = compare(credentials.pass, basicAuth.pass) && valid;
+
+        return valid;
+      }
+
+      // Check Auth passed or not
+      function authorize(req, res, next) {
         const credentials = auth(req);
         const authPassed = credentials && check(credentials);
-
         if (authEnabled && !authPassed) {
           res.status(401);
           res.set('WWW-Authenticate', 'Basic realm="example"');
           res.send('Access denied');
         } else {
-          let seed = String(Math.random());
-
-          CONFIG_TOKEN = crypto.createHash('md5').update(seed).digest('hex');
-
-          res.render(
-            'index', {
-              title: get(config, 'info.title'),
-              configUrl: path.posix.join(baseUrl, CONFIG_TOKEN)
-            }
-          );
+          next();
         }
+      }
+
+      // Swagger ui
+      swaggerApp.get('/', authorize, function(req, res) {
+        res.render(
+          'index', {
+            title: get(config, 'info.title'),
+            configUrl
+          }
+        );
       });
 
       // Swagger config api
-      swaggerApp.get('/:configToken', function (req, res) {
-        if (req.params.configToken === CONFIG_TOKEN) {
-          res.send(config);
-        } else {
-          res.send({});
-        }
+      swaggerApp.get('/config', authorize, function (req, res) {
+        res.send(config);
       });
 
       return swaggerApp;
@@ -416,7 +411,8 @@ function swaggerPlugin(app, options) {
         path.posix.join(
           config.basePath || '/',
           this.fullPath(),
-          SWAGGER_BASE_PATH
+          SWAGGER_BASE_PATH,
+          'config'
         )
       ),
       {
