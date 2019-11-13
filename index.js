@@ -122,7 +122,8 @@ function buildSwaggerConfig(app, options) {
     map(params, function(param) {
       let conf = {
         description: param.description,
-        default: param.default
+        default: param.default,
+        required: param.required || false,
       };
 
       // Prepare definitiion for complex structure
