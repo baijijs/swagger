@@ -1,6 +1,6 @@
 {
   "name": "baiji-swagger",
-  "version": "0.1.22",
+  "version": "0.1.23",
   "description": "Baiji swagger plugin",
   "main": "index.js",
   "scripts": {
@@ -30,11 +30,11 @@
     "lodash.set": "^4.3.2",
     "lodash.values": "^4.3.0",
     "semver": "^6.3.0",
-    "swagger-ui-dist": "^3.23.11",
+    "swagger-ui-dist": "^3.24.2",
     "tsscmp": "^1.0.6"
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "mocha": "^6.2.0"
+    "mocha": "^6.2.2"
   }
 }
